@@ -41,7 +41,7 @@ object EventhubsEventCount {
       "eventhubs.checkpoint.dir" -> inputOptions(Symbol(EventhubsArgumentKeys.CheckpointDirectory)).asInstanceOf[String]
     )
 
-    val sparkConfiguration = new SparkConf().setAppName(this.getClass.getSimpleName)
+    val sparkConfiguration = new SparkConf().setAppName(this.getClass.getSimpleName).setMaster("local[2]")
 
     sparkConfiguration.set("spark.streaming.receiver.writeAheadLog.enable", "true")
     sparkConfiguration.set("spark.streaming.driver.writeAheadLog.closeFileAfterWrite", "true")

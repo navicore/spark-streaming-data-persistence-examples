@@ -19,15 +19,21 @@ package com.microsoft.spark.streaming.examples.workloads
 
 import com.microsoft.spark.streaming.examples.arguments.EventhubsArgumentParser._
 import com.microsoft.spark.streaming.examples.arguments.{EventhubsArgumentKeys, EventhubsArgumentParser}
-import com.microsoft.spark.streaming.examples.common.{StreamStatistics, EventContent}
+import com.microsoft.spark.streaming.examples.common.{EventContent, StreamStatistics}
 import org.apache.spark._
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.streaming.eventhubs.EventHubsUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-object EventhubsToAzureBlobAsJSON {
+object SimpleClient {
+
+  val logger = LoggerFactory.getLogger(SimpleClient.getClass.getName)
 
   def createStreamingContext(inputOptions: ArgumentMap): StreamingContext = {
+
+    logger.info("============> createStreamingContext")
 
     val eventHubsParameters = Map[String, String](
       "eventhubs.namespace" -> inputOptions(Symbol(EventhubsArgumentKeys.EventhubsNamespace)).asInstanceOf[String],
@@ -60,18 +66,32 @@ object EventhubsToAzureBlobAsJSON {
     val eventHubsWindowedStream = eventHubsStream
       .window(Seconds(inputOptions(Symbol(EventhubsArgumentKeys.BatchIntervalInSeconds)).asInstanceOf[Int]))
 
+    //ejs
+    eventHubsWindowedStream.foreachRDD(rdd => {
+      logger.info("ejs got rdd: -------------------> ")
+    })
+    /*
+
     val sqlContext = new SQLContext(streamingContext.sparkContext)
 
     import sqlContext.implicits._
 
-    eventHubsWindowedStream.map(x => EventContent(new String(x)))
-      .foreachRDD(rdd => rdd.toDF().toJSON.saveAsTextFile(inputOptions(Symbol(EventhubsArgumentKeys.EventStoreFolder))
-        .asInstanceOf[String]))
+    logger.info("============> eventHubsWindowedStream")
+    eventHubsWindowedStream.map(x => {
+      logger.info("============> eventHubsWownedStream x: " + x)
+      EventContent(new String(x))
+    })
+      .foreachRDD(rdd => {
+        //rdd.toDF().toJSON.saveAsTextFile(inputOptions(Symbol(EventhubsArgumentKeys.EventStoreFolder)).asInstanceOf[String])
+        //rdd.toDF().toJSON.saveAsTextFile("/tmp/mydamnfile")
+        logger.info("============> rdd to json: " + rdd.toDF().toJSON)
+      })
 
     // Count number of events received the past batch
 
     val batchEventCount = eventHubsWindowedStream.count()
 
+    logger.info("============> batchEventCount: " + batchEventCount)
     batchEventCount.print()
 
     // Count number of events received so far
@@ -89,6 +109,7 @@ object EventhubsToAzureBlobAsJSON {
     }
 
     totalEventCount.print()
+     */
 
     streamingContext
   }
