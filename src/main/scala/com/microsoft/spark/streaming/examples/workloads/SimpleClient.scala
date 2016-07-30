@@ -64,15 +64,16 @@ object SimpleClient {
 
     val eventHubsStream = EventHubsUtils.createUnionStream(streamingContext, eventHubsParameters)
 
-    val sqlContext = new SQLContext(streamingContext.sparkContext)
-    import sqlContext.implicits._
-
     eventHubsStream.foreachRDD((rdd: RDD[Array[Byte]]) => {
       logger.info("ejs got eh rdd: -------------------> ")
       rdd.foreach(x => {
         logger.info("ejs got eh rdd field: -------------------> " + new String(x))
       })
     })
+
+    /*
+    val sqlContext = new SQLContext(streamingContext.sparkContext)
+    import sqlContext.implicits._
 
     val eventHubsWindowedStream = eventHubsStream
       .window(Seconds(inputOptions(Symbol(EventhubsArgumentKeys.BatchIntervalInSeconds)).asInstanceOf[Int]))
@@ -95,7 +96,6 @@ object SimpleClient {
         //rdd.toDF().toJSON.saveAsTextFile("/tmp/mydamnfile")
         logger.info("============> rdd to json: " + rdd.toDF().toJSON)
       })
-    /*
 
     // Count number of events received the past batch
 
