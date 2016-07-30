@@ -19,7 +19,8 @@ resolvers += Resolver.mavenLocal
 resolvers += "spark-eventhubs" at "https://raw.github.com/hdinsight/spark-eventhubs/maven-repo"
 
 //mainClass in assembly := Some("com.microsoft.spark.streaming.examples.workloads.EventhubsEventCount")
-mainClass in assembly := Some("com.microsoft.spark.streaming.examples.workloads.EventhubsToAzureBlobsAsJSON")
+//mainClass in assembly := Some("com.microsoft.spark.streaming.examples.workloads.EventhubsToAzureBlobsAsJSON")
+mainClass in assembly := Some("com.microsoft.spark.streaming.examples.workloads.SimpleClient")
 assemblyJarName in assembly := "EventhubsReceiver.jar"
 
 assemblyMergeStrategy in assembly := {

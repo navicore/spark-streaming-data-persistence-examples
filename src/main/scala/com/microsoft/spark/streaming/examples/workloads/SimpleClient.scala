@@ -21,6 +21,7 @@ import com.microsoft.spark.streaming.examples.arguments.EventhubsArgumentParser.
 import com.microsoft.spark.streaming.examples.arguments.{EventhubsArgumentKeys, EventhubsArgumentParser}
 import com.microsoft.spark.streaming.examples.common.{EventContent, StreamStatistics}
 import org.apache.spark._
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.streaming.eventhubs.EventHubsUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -63,29 +64,38 @@ object SimpleClient {
 
     val eventHubsStream = EventHubsUtils.createUnionStream(streamingContext, eventHubsParameters)
 
+    val sqlContext = new SQLContext(streamingContext.sparkContext)
+    import sqlContext.implicits._
+
+    eventHubsStream.foreachRDD((rdd: RDD[Array[Byte]]) => {
+      logger.info("ejs got eh rdd: -------------------> ")
+      rdd.foreach(x => {
+        logger.info("ejs got eh rdd field: -------------------> " + new String(x))
+      })
+    })
+
     val eventHubsWindowedStream = eventHubsStream
       .window(Seconds(inputOptions(Symbol(EventhubsArgumentKeys.BatchIntervalInSeconds)).asInstanceOf[Int]))
 
     //ejs
     eventHubsWindowedStream.foreachRDD(rdd => {
       logger.info("ejs got rdd: -------------------> ")
+      rdd.foreach( x => {
+        logger.info("ejs got str: -------------------> " + new String(x))
+      })
     })
-    /*
-
-    val sqlContext = new SQLContext(streamingContext.sparkContext)
-
-    import sqlContext.implicits._
 
     logger.info("============> eventHubsWindowedStream")
     eventHubsWindowedStream.map(x => {
       logger.info("============> eventHubsWownedStream x: " + x)
       EventContent(new String(x))
     })
-      .foreachRDD(rdd => {
+      .foreachRDD((rdd: RDD[EventContent]) => {
         //rdd.toDF().toJSON.saveAsTextFile(inputOptions(Symbol(EventhubsArgumentKeys.EventStoreFolder)).asInstanceOf[String])
         //rdd.toDF().toJSON.saveAsTextFile("/tmp/mydamnfile")
         logger.info("============> rdd to json: " + rdd.toDF().toJSON)
       })
+    /*
 
     // Count number of events received the past batch
 
